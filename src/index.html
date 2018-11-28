@@ -13,7 +13,7 @@
         background-color: #ddd;
         position: relative;
     }
-    #wrap{
+    #puzzle{
         width: 340px;
         height: 260px;
         position: absolute;
@@ -22,12 +22,12 @@
         margin-left: -170px;
         margin-top: -130px;
     }
-    #wrap .picture{
+    #puzzle .picture{
         width:107px;
         height: 80px;
         float: left;
     }
-    #wrap .picture i{
+    #puzzle .picture i{
         width: 99px;
         height: 72px;
         display: block;
@@ -61,20 +61,20 @@
         color: #fff;
         font-size: 20px;
     }
-    h2{
+    h3{
         color: red;
         display: block;
         position: absolute;
         top: 50%;
         left: 50%;
-        margin-left: -222px;
-        margin-top: -183px;
+        margin-left: -180px;
+        margin-top: -167px;
     }
 </style>
 </head>
 <body>
     <canvas id="cas" width="320" height="240"></canvas>
-    <div id="wrap">
+    <div id="puzzle">
         <div class="picture"><i></i></div>
         <div class="picture"><i></i></div>
         <div class="picture"><i></i></div>
@@ -89,7 +89,7 @@
         <source src="../video/movie.mp4" type="video/mp4">
     </video>
     <button>开始游戏</button>
-    <h2>提示：点击开始游戏，根据图片完成拼图</h2>
+    <h3>提示：点击开始游戏，根据图片完成拼图</h3>
 </body>
 </html>
 <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
@@ -98,9 +98,9 @@
 <script>
     var str = [];
     var str1 = [];
-    var index = [];
+    var dataIndex = [];
     var btn = document.getElementsByTagName('button')[0];
-    var text = document.getElementsByTagName('h2')[0];
+    var text = document.getElementsByTagName('h3')[0];
     var video = document.getElementById('video');
 
     for (var i = 0; i < 9; i++) {
@@ -110,7 +110,7 @@
         cas.setAttribute("width","107");
         cas.setAttribute("height","80");
         str1[i] = context;
-        index[i] = i;
+        dataIndex[i] = i;
         cas.className = "spell";
         $(".spell").eq(i).attr("data-index",i);
         $(".picture").eq(i).attr("data-index",i);
@@ -123,9 +123,11 @@
         console.log("拖动开始");
         $(this).data("top",$(this).offset().top);
         $(this).data("left",$(this).offset().left);
+        //利用data()读取或设置对象属性的特点，直接将对象保存到data-position 中
         $(this).data("position",$(this).offset());
     });
     hammer.on("panmove",function(ev){
+        //移动距离: ev.gesture.deltaX 和 ev.gesture.deltaY
         var top = $(this).data("position").top;
         var left = $(this).data("position").left;
         $(this).css({
@@ -136,7 +138,6 @@
     hammer.on("panend",function(ev){
         var centerX = $(this).data("position").left + ev.gesture.deltaX + $(this).width()/2;
         var centerY = $(this).data("position").top + ev.gesture.deltaY + $(this).height()/2;
-
         for (var j = 0;j < 9; j++){
             var t1 = $(".picture").eq(j).offset().top;
             var t2 = $(".picture").eq(j).offset().top + $(".picture").eq(j).height();
@@ -149,21 +150,22 @@
                     $(this).css({"left":l1 + "px","top":t1 + "px"});
                     str.push($(this));
                     if(str.length == 9){
-                        alert('拼图成功');
+                        alert('恭喜你，拼图成功！');
                     }
                 }
             }
         }
     });
-//点击开始游戏
+
     btn.onclick = function(){
         video.style.opacity = 0;
         text.style.display = "none";
         btn.style.display = "none";
         setInterval(function(){
         for(var i = 0; i<9;i++){
-            var row = Math.floor(index[i] / 3);
-            var col = Math.floor(index[i] % 3);
+            //每个九宫格的索引值和坐标位置的转换关系
+            var row = Math.floor(dataIndex[i] / 3) //取余数获取行数
+            var col = Math.floor(dataIndex[i] % 3)//取模获得列数
             str1[i].drawImage(video,(col*107),(row*80),107,80,0,0,107,80);
             }
         },50);
