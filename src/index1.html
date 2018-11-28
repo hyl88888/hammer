@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>hammer.js使用测试</title>
+	<style>
+		html,body{
+			margin:0;
+			padding:0;
+			width:100px;
+			height:100px;
+			background-color: #ddd;
+		}
+		#puzzle{
+			position: absolute;
+			top: 40%;
+			left: 30%;
+			width:340px;
+			height: 260px;
+		}
+		#puzzle .container{
+			float:left;
+			width:107px;
+			height:80px;
+		}
+		#puzzle .container i{
+			display: block;
+			margin:4px;
+			width: 99px;
+			height: 72px;
+			background-color: #fff;
+		}
+		#video{
+			/*display: none;*/
+			opacity: 0;
+			position: absolute;
+			top: 0;
+			left:0;
+		}
+		canvas{
+			position: absolute;
+			z-index: 4;
+		}
+		.play{
+			margin: 600px 0 0 600px;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="cas" width="320" height="240"></canvas>
+	<div id="puzzle">
+		<div class="container"><i></i></div>
+		<div class="container"><i></i></div>
+		<div class="container"><i></i></div>
+		<div class="container"><i></i></div>
+		<div class="container"><i></i></div>
+		<div class="container"><i></i></div>
+		<div class="container"><i></i></div>
+		<div class="container"><i></i></div>
+		<div class="container"><i></i></div>
+	</div>
+	<input type="button" class="play" value="开始游戏">
+	<video muted width="320" height="240" id="video" autoplay="autoplay" loop preload="">
+		<source src="video/movie.mp4" type="video/mp4">
+	</video>
+</body>
+</html>
+<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/hammer.js/2.0.8/hammer.min.js"></script>
+<script src="js/jquery.hammer.js"></script>
+<script>
+	$(".play").on("click",function(){
+		$("#video").css("opacity","1");
+		alert("游戏开始,你有五秒钟观看原视频.")
+		setTimeout(function(){
+			$("#video").css("opacity","0");
+			var dataindex = [];
+			var xx = [];
+			// var zz = [];
+			for(var i = 0; i < 9; i++){
+				var cass = document.createElement("canvas");
+				var	contexts = cass.getContext("2d");
+				cass.className = "cass";
+				cass.setAttribute("width","107px");
+				cass.setAttribute("height","80px");
+				cass.style.left = (Math.random() * window.screen.width/2)+"px";
+				cass.style.top = (Math.random() * window.screen.height/2)+"px";
+				cass.style.transform = "rotate("+ Math.random() * 20 + "deg)";
+				window.document.body.appendChild(cass);
+				dataindex[i]=i;
+				xx[i] = contexts;
+				$(".container").eq(i).attr("data-index",i);
+				$(".cass").eq(i).attr("data-index",i);
+				// console.log(contexts);
+			}
+			var cas = document.getElementsByClassName('cass');
+			var hammer = $(".cass").hammer();
+			console.log(hammer[1]);
+			hammer.on("panstart",function(ev){
+				$(this).attr("data-left",$(this).offset().left);
+				$(this).attr("data-top",$(this).offset().top);
+				$(this).data("position",$(this).offset());
+			})
+			hammer.on("panmove",function(ev){
+				console.log("拖动中");
+				var top = $(this).data("position").top;
+				var left = $(this).data("position").left;
+				$(this).css({
+					"top": top + ev.gesture.deltaY,
+					"left": left + ev.gesture.deltaX
+				})
+			})
+			hammer.on("panend",function(ev){
+				// console.log($(this).attr("data-index"));
+				// console.log($("#puzzle div").eq($(this).attr("data-index")));
+				var centerX = $(this).data("position").left + ev.gesture.deltaX + $(this).width()/2;
+				var centerY = $(this).data("position").top + ev.gesture.deltaY + $(this).height()/2;
+				// console.log(centerX);
+				var thats = this;
+				// console.log($(".container").eq(j));
+				var newleft = $(".container").eq($(this).data("index")).prevObject[$(this).data("index")].offsetLeft;
+				var newtop = $(".container").eq($(this).data("index")).prevObject[$(this).data("index")].offsetTop;
+				var boxleft = $("#puzzle").offset().left;
+				var boxtop = $("#puzzle").offset().top;
+					// console.log($(".container").eq($(this).data("index")).data("index"))
+				if(centerX > (newleft + boxleft)  && centerX < (newleft+$(".container").eq($(this).data("index")).prevObject[$(this).data("index")].clientWidth+boxleft) &&  centerY > newtop + boxtop && centerY < (newtop + boxtop + $(".container").eq($(this).data("index")).prevObject[$(this).data("index")].clientHeight)){
+					console.log("移动到container里面了");
+					// if($(".container").eq($(this).data("index")).data("index") === $(this).data("index")){
+						$(this).removeAttr("style");
+						$(".container i").eq($(this).data("index")).prepend($(this));
+						console.log($("#puzzle div").find("canvas").length);
+
+						if($("#puzzle div").find("canvas").length == 9){
+							alert("恭喜你，游戏完成！");
+						}
+					// }
+				}
+			})
+			setInterval(function(){
+				for(var i = 0;i < 9;i++){
+					//每个九宫格的索引值和坐标位置的转换关系
+					var row = Math.floor(dataindex[i]/3)//取余数获取行数
+					var col = Math.floor(dataindex[i]%3)//取模获得列数
+					xx[i].drawImage(video,(col*107),(row*80),107,80,0,0,107,80);
+				}
+			},50)
+
+		},5000)
+	})
+
+</script>

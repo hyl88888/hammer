@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>包含检测</title>
+<style>
+    #p1{
+      width:60px ;height: 60px;background: green;
+      position: absolute;
+    }
+    #p2{
+      width:200px ;height: 200px;background: yellow;
+      position: absolute;left: 300px;bottom:200px;z-index: -1;
+    }
+</style>	
+</head>
+<body>
+<p id="p1"></p>
+<p id="p2"></p>
+</body>
+</html>
+<script>
+  window.onload = function () {
+    var op = document.getElementById('p1');
+    var op2 = document.getElementById('p2');
+    op.onmousedown = function () {
+       document.onmousemove=function (evt) {
+            var event=evt||window.event;
+            op.style.left=event.clientX-op.offsetWidth/2+"px";
+            op.style.top =event.clientY-op.offsetHeight/2+"px";          
+      }
+      document.onmouseup = function (ev) {
+        var event= ev||window.event;
+        var t2 = op2.offsetTop;
+        var l2 = op2.offsetLeft;
+        var r2 = op2.offsetLeft + op2.offsetWidth;
+        var b2 = op2.offsetTop + op2.offsetHeight;
+        if(ev.clientX>t2 && ev.clientX<b2 && ev.clientY>l2 && ev.clientY<r2){// 
+           op2.style.background = 'blue';
+        }else{
+           op2.style.background = 'yellow';
+        }
+        document.onmousemove = null;
+        document.onmouseup = null;
+      }
+      //return false;
+    }
+  }
+  var a = [1,1,2,3,7,3];
+var b = [];
+for (var i = 0; i < a.length; i++) {
+  if(a[i] != b[i]){
+    b.push(a[i]);
+  }
+}
+console.log(b)
+</script>

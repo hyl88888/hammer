@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>拼图小游戏</title>
+	<style>
+	*{
+		margin: 0;
+		padding: 0;
+	}
+	.ballon{
+		position: absolute;
+		width: 150px;
+		height: 150px;
+		background-image: url(images/ping.jpg);
+		/* background-position: -192px	0px; */
+		font-size: 44px;
+		color: #fff;
+	}
+	.score {
+		font-size: 36px;
+	}
+	.box{
+		width: 450px;
+		height: 450px;
+		margin-left: auto;
+		margin-right: auto;
+		margin-top: 100px;
+		/* box-sizing: border-box; */
+		border-top: 1px solid #333;
+		border-left: 1px solid #333;
+	}
+	.box li{
+		width: 150px;
+		height: 150px;
+		float: left;
+		box-sizing: border-box;
+		border-right: 1px solid #333;
+		border-bottom: 1px solid #333;
+		list-style: none;
+	}
+	</style>
+</head>
+<body>
+	<div class="box">
+		<ul>
+			<li></li><li></li><li></li>
+			<li></li><li></li><li></li>
+			<li></li><li></li><li></li>
+		</ul>
+	</div>
+</body>
+</html>
+<script>
+var gameScore = document.getElementById('gameScore');
+var box = document.querySelector(".box");
+var boxTop = box.offsetTop;
+var boxLeft = box.offsetLeft;
+var boxRight = box.offsetLeft + box.offsetWidth;
+var boxBottom = box.offsetTop + box.offsetHeight;
+console.log( box );
+var arrLis = document.getElementsByTagName('li');
+var arrOk=[]; //用来保存正确的序号
+function Ballon(num) {
+
+	this.randomNum = num+1;
+	//屏幕的宽度和高度
+	this.maxWidth = document.documentElement.clientWidth || document.body.clientWidth;
+	this.maxHeight = document.documentElement.clientHeight || document.body.clientHeight;
+	//气球的X轴的位置，Y轴的位置
+	this.posX = randomNumber(0, this.maxWidth-150);
+	this.posY = randomNumber(0, this.maxHeight-150);
+	
+	//1、添加初始化事件，appendChild到屏幕上
+	this.initialize();
+	//3、添加加事件绑定，响应点击，以及没被点击后的操作
+	this.addEvent();
+	
+}
+Ballon.prototype.initialize = function(){
+	//创建DOM
+	this.dom = document.createElement("div");
+	this.dom.className = "ballon";
+
+	if( this.randomNum < 4){
+		this.dom.style.backgroundPosition = -((this.randomNum-1)*150)+"px" + " 0px";
+	}else if(this.randomNum < 7){
+		this.dom.style.backgroundPosition = -((this.randomNum-4)*150)+"px" + " -150px";
+	}else{
+		this.dom.style.backgroundPosition = -((this.randomNum-7)*150)+"px" + " -300px";
+	}
+
+	this.dom.style.left = this.posX + "px";
+	this.dom.style.top = this.posY + "px";
+	this.dom.innerHTML = this.randomNum;
+	document.body.appendChild( this.dom );
+}
+
+function randomNumber(min, max){
+	return Math.floor( Math.random()*(max-min) + min);
+}
+
+Ballon.prototype.addEvent = function(){
+	var that = this;
+	this.dom.onmousedown = function(){
+		 document.onmousemove=function (evt) {
+            var event=evt||window.event;
+            that.dom.style.left=event.clientX-that.dom.offsetWidth/2+"px";
+            that.dom.style.top=event.clientY-that.dom.offsetHeight/2+"px";          
+        }
+     	document.onmouseup=function (evt) {
+        	var event=evt||window.event;
+    		var picPosX = event.clientX;
+    		var picPosY = event.clientY;       	
+         	document.onmousemove=null;
+         		//再检查是否在小格子里
+	        	for (var i = 0; i < arrLis.length; i++) {
+	        		//获取每一个格子的坐标
+	        		var t1 = arrLis[i].offsetTop;
+	        		var l1 = arrLis[i].offsetLeft;
+	        		var r1 = arrLis[i].offsetLeft + arrLis[i].offsetWidth;
+	        		var b1 = arrLis[i].offsetTop + arrLis[i].offsetHeight;
+	        		//判断鼠标松开后的坐标点是否在某一个li标签里面
+	        		if( picPosX > l1 && picPosX < r1 && picPosY > t1 && picPosY <b1 ){
+	        			//实现自动对齐
+	        			that.dom.style.left = l1 + "px";
+	        			that.dom.style.top = t1 + "px";
+	        			//判断图片的序号是否正确
+	        			if( that.randomNum == i+1){
+	        				//如果arrOK中没有这个序号，则加进去
+	        				if( arrOk.indexOf(that.randomNum) == -1){
+	        					arrOk.push(that.randomNum);
+	        				}
+	        			}else{
+	        				//如果用户又把正确序号的图片拖出去了，则从arrOK中去除。
+	        				if( arrOk.indexOf(that.randomNum) != -1){
+	        					arrOk.splice(arrOk.indexOf(that.randomNum),1);
+	        				}
+	        			}
+	        		}
+	        	}
+        		console.log( arrOk );
+        	if( arrOk.length == 9){
+        		alert("正确！");
+        	}
+    	}
+	}
+}
+
+var ballArr=[]; 
+for (var i = 0; i < 9; i++) {
+	ballArr.push(new Ballon(i));
+}
+
+
+</script>

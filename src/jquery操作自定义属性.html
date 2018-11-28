@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+		.box{
+			width:100px;
+			height: 100px;
+			position: absolute;
+			left: 0;
+			top:0;
+			background-color: red;
+			z-index: 2;
+		}
+		.parent{
+			border:1px solid #000;
+			width:101px;
+			height: 101px;
+			position: absolute;
+			top: 200px;
+			left: 140px;
+			z-index: 1;
+		}
+	</style>
+</head>
+<body>
+	<div class="box" data-top="" data-left=""></div>
+	<div class="parent"></div>
+</body>
+</html>
+<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/hammer.js/2.0.8/hammer.min.js"></script>
+<script src="js/jquery.hammer.js"></script>
+<script>
+var box = document.getElementsByTagName('div')[0];
+var hammer = $("div.box").hammer();
+hammer.on("panstart",function(ev){
+	//jqueryde offset() 获取当前对象的偏移量
+	//offset() 获取当前对象相对于文档的偏移
+	// console.log($(this).offset());
+	$(this).attr("data-top",$(this).offset().top);
+	$(this).attr("data-left",$(this).offset().left);
+	/*$(this).data("top",$(this).offset().top);
+	$(this).data("left",$(this).offset().left);*/
+
+	//利用data()读取或设置对象属性的特点，直接将对象保存到data-position 中
+	$(this).data("position",$(this).offset());
+});
+hammer.on("panmove",function(ev){
+	//移动距离 ev.gesture.deltaX 和 ev.gesture.deltaY
+	// console.log(ev);
+	var top = $(this).data("position").top;
+	var left = $(this).data("position").left;
+	$(this).css({
+		"top": top + ev.gesture.deltaY,
+		"left":left+ ev.gesture.deltaX
+	})
+});
+hammer.on("panend",function(ev){
+	/*console.log("box的top偏移量是："+$(this).data("position").top);
+	console.log("box的left偏移量是："+$(this).data("position").left);*/
+	//获取移动元素的中心点坐标: var centextX = 绝对定位的坐标X+（移动距离）+宽度的一半
+	//获取移动元素的中心点坐标: var centextY = 绝对定位的坐标Y+（移动距离）+高度的一半
+	/*if(centextX > parent的左边 而且 小于parent的右边 而且 centextY 大于 parent的上边 而且 小于 parent的下边){
+		console.log("移动到parent里面了");
+	}*/
+	var centextX =$(this).data("position").left+ev.gesture.deltaX+($(this).width()/2);
+	var centextY = $(this).data("position").top+ev.gesture.deltaY+($(this).height()/2);
+	console.log(centextX,centextY);
+	var t1 = $(".parent").offset().top;
+	var l1 = $(".parent").offset().left;
+	var b1 = $(".parent").offset().top + $(".parent").height();
+	var r1 = $(".parent").offset().left + $(".parent").width();
+	console.log(l1,t1,r1,b1);
+	if(centextX > l1 && centextX < r1 && centextY > t1 && centextY < b1){
+		alert("移动到parent里面了");
+	}
+
+});
+</script>
